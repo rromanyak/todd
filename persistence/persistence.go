@@ -9,35 +9,30 @@
 package persistence
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-
 	log "github.com/Sirupsen/logrus"
-	"github.com/toddproject/todd/agent/defs"
-	pb "github.com/toddproject/todd/api/exp/generated"
 	"github.com/toddproject/todd/config"
-	"github.com/toddproject/todd/server/objects"
 
 	"github.com/dgraph-io/badger"
 )
 
-func NewPersistence(cfg config.Config) (*Persistence, error) {
+func NewPersistence(cfg *config.ToDDConfig) (*Persistence, error) {
 
 	var p Persistence
 
 	opts := badger.DefaultOptions
-	opts.Dir = "/Users/mierdin/Code/GO/src/github.com/toddproject/todd/tmpdb"
-	opts.ValueDir = "/Users/mierdin/Code/GO/src/github.com/toddproject/todd/tmpdb"
-	p.db, err := badger.Open(opts)
+	opts.Dir = cfg.OptDir
+	opts.ValueDir = cfg.OptDir
+	db, err := badger.Open(opts)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	p.db = db
+
 	return &p, nil
 }
 
-type persistence struct {
-	config config.Config
-	db     badger.Db
+type Persistence struct {
+	config *config.ToDDConfig
+	db     *badger.DB
 }

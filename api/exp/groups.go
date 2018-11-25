@@ -12,7 +12,6 @@ import (
 	"context"
 
 	pb "github.com/toddproject/todd/api/exp/generated"
-	db "github.com/toddproject/todd/db"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -21,7 +20,7 @@ func (s *server) CreateGroup(ctx context.Context, newGroup *pb.Group) (*pb.Group
 
 	newGroup.Validate()
 
-	err := db.CreateGroup(newGroup)
+	err := s.persistence.CreateGroup(newGroup)
 	if err != nil {
 		log.Errorln(err)
 		return nil, err
@@ -32,7 +31,7 @@ func (s *server) CreateGroup(ctx context.Context, newGroup *pb.Group) (*pb.Group
 
 func (s *server) ListGroups(ctx context.Context, f *pb.GroupFilter) (*pb.GroupList, error) {
 
-	groups, err := db.ListGroups()
+	groups, err := s.persistence.ListGroups()
 	if err != nil {
 		return nil, err
 	}

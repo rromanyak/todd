@@ -15,24 +15,17 @@ import (
 	"google.golang.org/grpc"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/toddproject/todd/db"
+	"github.com/toddproject/todd/persistence"
 
 	pb "github.com/toddproject/todd/api/exp/generated"
 	"github.com/toddproject/todd/config"
 )
 
-type ToDDApiExp struct {
-	cfg config.Config
-	tdb db.DatabasePackage
-}
-
 const (
 	port = ":50099"
 )
 
-func (tapi ToDDApiExp) Start(cfg config.Config) error {
-
-	tapi.cfg = cfg
+func StartAPI(cfg *config.ToDDConfig, p *persistence.Persistence) error {
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -40,7 +33,10 @@ func (tapi ToDDApiExp) Start(cfg config.Config) error {
 	}
 	// Creates a new gRPC server
 	s := grpc.NewServer()
-	pb.RegisterGroupsServer(s, &server{})
+	pb.RegisterGroupsServer(s, &server{
+		cfg:         cfg,
+		persistence: p,
+	})
 
 	// log.Infof("Serving ToDD Server API at: %s\n", serveURL)
 
@@ -49,8 +45,9 @@ func (tapi ToDDApiExp) Start(cfg config.Config) error {
 
 }
 
-// server is used to implement customer.CustomerServer.
 type server struct {
-	groups []*pb.Group
-	agents map[string]*pb.Agent
+	groups      []*pb.Group
+	agents      map[string]*pb.Agent
+	persistence *persistence.Persistence
+	cfg         *config.ToDDConfig
 }

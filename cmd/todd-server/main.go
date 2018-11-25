@@ -17,11 +17,13 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	api "github.com/toddproject/todd/api/exp"
+	"github.com/toddproject/todd/persistence"
 
 	"github.com/toddproject/todd/config"
 )
 
 var (
+	// TODO(mierdin): generate this automatically like you did in Syringe
 	toddVersion = "0.0.1"
 	// Command-line Arguments
 	argVersion string
@@ -49,7 +51,7 @@ func init() {
 
 func main() {
 
-	cfg, err := config.GetConfig(argVersion)
+	cfg, err := config.LoadConfigFromEnv()
 	if err != nil {
 		log.Fatalf("Problem getting configuration: %v\n", err)
 	}
@@ -57,11 +59,10 @@ func main() {
 	// Start serving collectors and testlets, and retrieve map of names and hashes
 	// assets := newAssetConfig(cfg)
 
-	// Perform database initialization tasks
-	// tdb, err := db.NewToddDB(cfg)
-	// if err != nil {
-	// 	log.Fatalf("Error setting up database: %v\n", err)
-	// }
+	p, err := persistence.NewPersistence(cfg)
+	if err != nil {
+		log.Fatalf("Error setting up database: %v\n", err)
+	}
 
 	// if err := tdb.Init(); err != nil {
 	// 	log.Fatalf("Error initializing database: %v\n", err)
@@ -73,9 +74,8 @@ func main() {
 	// 	log.Fatal(tapi.Start(cfg))
 	// }()
 
-	var api api.ToDDApiExp
 	go func() {
-		log.Fatal(api.Start(cfg))
+		log.Fatal(api.StartAPI(cfg, p))
 	}()
 
 	// Start listening for agent advertisements

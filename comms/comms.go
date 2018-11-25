@@ -63,7 +63,7 @@ type toddComms struct {
 
 // NewToDDComms will create a new instance of toddComms, and load the desired
 // CommsPackage-compatible comms package into it.
-func NewToDDComms(cfg config.Config) (*toddComms, error) { // TODO: Return Package instead of *struct embedding Package
+func NewToDDComms(cfg *config.ToDDConfig) (*toddComms, error) { // TODO: Return Package instead of *struct embedding Package
 
 	// var tc toddComms
 
@@ -84,10 +84,11 @@ func NewToDDComms(cfg config.Config) (*toddComms, error) { // TODO: Return Packa
 // NewAgentComms returns a comms instance configured for agent usages.
 //
 // TODO: accept an interface for cache instead of concrete type
-func NewAgentComms(cfg config.Config, ac *cache.AgentCache) (*toddComms, error) {
-	comms, err := NewToDDComms(cfg)
-	if err == nil {
-		comms.setAgentCache(ac)
-	}
-	return comms, err
+func NewAgentComms(cfg *config.ToDDConfig, ac *cache.AgentCache) (*toddComms, error) {
+	// comms, err := NewToDDComms(cfg)
+	// if err == nil {
+	// 	comms.setAgentCache(ac)
+	// }
+	// return comms, err
+	return nil, nil
 }

@@ -14,15 +14,14 @@ import (
 	"path/filepath"
 
 	cli "github.com/codegangsta/cli"
-	capi "github.com/toddproject/todd/api/_old/client"
 )
 
 func main() {
 
-	var clientAPI capi.ClientAPI
-
 	app := cli.NewApp()
 	app.Name = "todd"
+
+	// TODO(mierdin): autogen like in syringe
 	app.Version = "v0.1.0"
 	app.Usage = "A highly extensible framework for distributed testing on demand"
 
@@ -45,10 +44,10 @@ func main() {
 	}
 
 	// TODO(mierdin): This MAY not work. These vars may not execute until after app.Run
-	clientAPI.Conf = map[string]string{
-		"host": host,
-		"port": port,
-	}
+	// clientAPI.Conf = map[string]string{
+	// 	"host": host,
+	// 	"port": port,
+	// }
 	// expApiClient.Conf = map[string]string{
 	// 	"host": host,
 	// 	"port": port,
@@ -57,70 +56,6 @@ func main() {
 	// ToDD Commands
 	// TODO(mierdin): this is quite large. Should consider breaking this up into more manageable chunks
 	app.Commands = []cli.Command{
-
-		// "todd agents ..."
-		{
-			Name:  "agents",
-			Usage: "Show ToDD agent information",
-			Action: func(c *cli.Context) {
-				agents, err := clientAPI.Agents(
-					map[string]string{
-						"host": host,
-						"port": port,
-					},
-					c.Args().Get(0),
-				)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
-				err = clientAPI.DisplayAgents(agents, !(c.Args().Get(0) == ""))
-				if err != nil {
-					fmt.Println("Problem displaying agents (client-side)")
-				}
-			},
-		},
-
-		// "todd create ..."
-		{
-			Name:  "create",
-			Usage: "Create ToDD object (group, testrun, etc.)",
-			Action: func(c *cli.Context) {
-
-				err := clientAPI.Create(
-					map[string]string{
-						"host": host,
-						"port": port,
-					},
-					c.Args().Get(0),
-				)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
-			},
-		},
-
-		// "todd delete ..."
-		{
-			Name:  "delete",
-			Usage: "Delete ToDD object",
-			Action: func(c *cli.Context) {
-				err := clientAPI.Delete(
-					map[string]string{
-						"host": host,
-						"port": port,
-					},
-					c.Args().Get(0),
-					c.Args().Get(1),
-				)
-				if err != nil {
-					fmt.Printf("ERROR: %s\n", err)
-					fmt.Println("(Are you sure you provided the right object type and/or label?)")
-					os.Exit(1)
-				}
-			},
-		},
 
 		// "todd group ..."
 		// TODO(mierdin) need to document usage of c.Args().First()
@@ -214,52 +149,6 @@ func main() {
 						}
 					},
 				},
-			},
-		},
-
-		// "todd run ..."
-		{
-			Name: "run",
-			Flags: []cli.Flag{
-				cli.BoolFlag{
-					Name:  "j",
-					Usage: "Output test data for this testrun when finished",
-				},
-				cli.BoolFlag{
-					Name:  "y",
-					Usage: "Skip confirmation and run referenced testrun immediately",
-				},
-				cli.StringFlag{
-					Name:  "source-group",
-					Usage: "The name of the source group",
-				},
-				cli.StringFlag{
-					Name:  "source-app",
-					Usage: "The app to run for this test",
-				},
-				cli.StringFlag{
-					Name:  "source-args",
-					Usage: "Arguments to pass to the testlet",
-				},
-			},
-			Usage: "Execute an already uploaded testrun object",
-			Action: func(c *cli.Context) {
-				err := clientAPI.Run(
-					map[string]string{
-						"host":        host,
-						"port":        port,
-						"sourceGroup": c.String("source-group"),
-						"sourceApp":   c.String("source-app"),
-						"sourceArgs":  c.String("source-args"),
-					},
-					c.Args().Get(0),
-					c.Bool("j"),
-					c.Bool("y"),
-				)
-				if err != nil {
-					fmt.Println(err)
-					os.Exit(1)
-				}
 			},
 		},
 	}

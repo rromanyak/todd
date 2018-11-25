@@ -10,9 +10,9 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-func (p *persistence) CreateGroup(group *pb.Group) error {
+func (p *Persistence) CreateGroup(group *pb.Group) error {
 
-	txn := db.NewTransaction(true)
+	txn := p.db.NewTransaction(true)
 	defer txn.Discard()
 
 	groupJson, err := json.Marshal(group)
@@ -32,32 +32,21 @@ func (p *persistence) CreateGroup(group *pb.Group) error {
 	return nil
 }
 
-func (p *persistence) ListGroups() ([]*pb.Group, error) {
-	// https://github.com/dgraph-io/badger/issues/436
-	// Open the Badger database located in the referenced directory.
-	// It will be created if it doesn't exist.
-	opts := badger.DefaultOptions
-	opts.Dir = "/Users/mierdin/Code/GO/src/github.com/toddproject/todd/tmpdb"
-	opts.ValueDir = "/Users/mierdin/Code/GO/src/github.com/toddproject/todd/tmpdb"
-	db, err := badger.Open(opts)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
+func (p *Persistence) ListGroups() ([]*pb.Group, error) {
 
 	groups := []*pb.Group{}
 
-	err = db.View(func(txn *badger.Txn) error {
+	err := p.db.View(func(txn *badger.Txn) error {
 		it := txn.NewIterator(badger.DefaultIteratorOptions)
 		defer it.Close()
 		prefix := []byte("group/")
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			item := it.Item()
-			k := item.Key()
+			// k := item.Key()
 			v, _ := item.ValueCopy(nil)
 
 			var group pb.Group
-			err = json.Unmarshal(v, &group)
+			err := json.Unmarshal(v, &group)
 			if err != nil {
 				log.Warn("Error converting group to json")
 			}
