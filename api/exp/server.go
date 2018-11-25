@@ -34,20 +34,13 @@ func (tapi ToDDApiExp) Start(cfg config.Config) error {
 
 	tapi.cfg = cfg
 
-	tdb, err := db.NewToddDB(tapi.cfg)
-	if err != nil {
-		return err
-	}
-
-	tapi.tdb = tdb
-
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Errorf("failed to listen: %v", err)
 	}
 	// Creates a new gRPC server
 	s := grpc.NewServer()
-	pb.RegisterGroupsServer(s, &server{tdb: tdb})
+	pb.RegisterGroupsServer(s, &server{})
 
 	// log.Infof("Serving ToDD Server API at: %s\n", serveURL)
 
@@ -59,5 +52,5 @@ func (tapi ToDDApiExp) Start(cfg config.Config) error {
 // server is used to implement customer.CustomerServer.
 type server struct {
 	groups []*pb.Group
-	tdb    db.DatabasePackage
+	agents map[string]*pb.Agent
 }

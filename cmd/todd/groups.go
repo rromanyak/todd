@@ -6,7 +6,7 @@
 	https://github.com/toddproject/todd/blob/master/LICENSE
 */
 
-package api
+package main
 
 import (
 	"context"
@@ -19,8 +19,7 @@ import (
 	pb "github.com/toddproject/todd/api/exp/generated"
 )
 
-// ListGroups retrieves all groups
-func (capi APIExpClient) ListGroups(conf map[string]string) ([]*pb.Group, error) {
+func ListGroups(conf map[string]string) ([]*pb.Group, error) {
 
 	var (
 		serverAddr = flag.String("server_addr", "127.0.0.1:50099", "The server address in the format of host:port")
@@ -34,7 +33,7 @@ func (capi APIExpClient) ListGroups(conf map[string]string) ([]*pb.Group, error)
 	defer conn.Close()
 	client := pb.NewGroupsClient(conn)
 
-	groupList, err := client.GetGroups(context.Background(), &pb.GroupFilter{})
+	groupList, err := client.ListGroups(context.Background(), &pb.GroupFilter{})
 	if err != nil {
 		return nil, err
 	}
@@ -43,20 +42,17 @@ func (capi APIExpClient) ListGroups(conf map[string]string) ([]*pb.Group, error)
 
 }
 
-// GetGroup retrieves a specific group by name
-func (capi APIExpClient) GetGroup(groupName string) error {
+func GetGroup(groupName string) error {
 	fmt.Printf("NOT IMPLEMENTED - would have retrieved group %s\n", groupName)
 	return nil
 }
 
-// DeleteGroup deletes a specific group by name
-func (capi APIExpClient) DeleteGroup(groupName string) error {
+func DeleteGroup(groupName string) error {
 	fmt.Printf("NOT IMPLEMENTED - would have deleted group %s\n", groupName)
 	return nil
 }
 
-// CreateGroup creates a new group
-func (capi APIExpClient) CreateGroup(group *pb.Group) error {
+func CreateGroup(group *pb.Group) error {
 
 	var (
 		serverAddr = flag.String("server_addr", "127.0.0.1:50099", "The server address in the format of host:port")

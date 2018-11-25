@@ -15,14 +15,11 @@ import (
 
 	cli "github.com/codegangsta/cli"
 	capi "github.com/toddproject/todd/api/_old/client"
-	api "github.com/toddproject/todd/api/exp"
-	expClient "github.com/toddproject/todd/api/exp/client"
 )
 
 func main() {
 
 	var clientAPI capi.ClientAPI
-	var expApiClient expClient.APIExpClient
 
 	app := cli.NewApp()
 	app.Name = "todd"
@@ -52,10 +49,10 @@ func main() {
 		"host": host,
 		"port": port,
 	}
-	expApiClient.Conf = map[string]string{
-		"host": host,
-		"port": port,
-	}
+	// expApiClient.Conf = map[string]string{
+	// 	"host": host,
+	// 	"port": port,
+	// }
 
 	// ToDD Commands
 	// TODO(mierdin): this is quite large. Should consider breaking this up into more manageable chunks
@@ -129,19 +126,20 @@ func main() {
 		// TODO(mierdin) need to document usage of c.Args().First()
 		{
 			Name:    "group",
-			Aliases: []string{"gr"},
+			Aliases: []string{"gr", "groups"},
 			Usage:   "Work with ToDD groups",
 			Subcommands: []cli.Command{
 				{
 					Name:  "list",
 					Usage: "List group definitions",
 					Action: func(c *cli.Context) {
-						groups, err := expApiClient.ListGroups(
+						groups, err := ListGroups(
 							map[string]string{
 								"host": host,
 								"port": port,
 							},
 						)
+						fmt.Println(groups)
 						if err != nil {
 							fmt.Println(err)
 							os.Exit(1)
@@ -149,9 +147,11 @@ func main() {
 
 							// Convert to interface slice
 							// https://github.com/golang/go/wiki/InterfaceSlice
-							var resourceSlice []api.ToDDResource = make([]api.ToDDResource, len(groups))
-							for i, d := range groups {
-								resourceSlice[i] = d
+							// var resourceSlice []api.ToDDResource = make([]api.ToDDResource, len(groups))
+							var resourceSlice []interface{}
+							for _, d := range groups {
+								// resourceSlice[i] = d
+								resourceSlice = append(resourceSlice, d)
 							}
 
 							// Print resources as table to user
@@ -164,7 +164,7 @@ func main() {
 					Name:  "get",
 					Usage: "Retrieve a single group definition",
 					Action: func(c *cli.Context) {
-						err := expApiClient.GetGroup(
+						err := GetGroup(
 							c.Args().First(),
 						)
 						if err != nil {
@@ -177,7 +177,7 @@ func main() {
 					Name:  "delete",
 					Usage: "Delete a group definition",
 					Action: func(c *cli.Context) {
-						err := expApiClient.DeleteGroup(
+						err := DeleteGroup(
 							c.Args().First(),
 						)
 						if err != nil {
@@ -207,7 +207,7 @@ func main() {
 							os.Exit(1)
 						}
 
-						err = expApiClient.CreateGroup(group)
+						err = CreateGroup(group)
 						if err != nil {
 							fmt.Println(err)
 							os.Exit(1)

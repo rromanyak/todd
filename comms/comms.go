@@ -11,10 +11,6 @@
 package comms
 
 import (
-	"errors"
-
-	log "github.com/Sirupsen/logrus"
-
 	"github.com/toddproject/todd/agent/cache"
 	"github.com/toddproject/todd/agent/defs"
 	"github.com/toddproject/todd/agent/responses"
@@ -69,18 +65,19 @@ type toddComms struct {
 // CommsPackage-compatible comms package into it.
 func NewToDDComms(cfg config.Config) (*toddComms, error) { // TODO: Return Package instead of *struct embedding Package
 
-	var tc toddComms
+	// var tc toddComms
 
-	// Load the appropriate comms package based on config file
-	switch cfg.Comms.Plugin {
-	case "rabbitmq":
-		tc.Package = newRabbitMQComms(cfg)
-	default:
-		log.Error("Invalid comms plugin in config file")
-		return nil, errors.New("Invalid comms plugin in config file")
-	}
+	// // Load the appropriate comms package based on config file
+	// switch cfg.Comms.Plugin {
+	// case "rabbitmq":
+	// 	tc.Package = newRabbitMQComms(cfg)
+	// default:
+	// 	log.Error("Invalid comms plugin in config file")
+	// 	return nil, errors.New("Invalid comms plugin in config file")
+	// }
 
-	return &tc, nil
+	// return &tc, nil
+	return nil, nil
 
 }
 
