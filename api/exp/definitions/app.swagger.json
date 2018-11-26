@@ -15,5 +15,63 @@
     "application/json"
   ],
   "paths": {},
-  "definitions": {}
+  "definitions": {
+    "AppAppParams": {
+      "type": "object",
+      "properties": {
+        "testlet": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expApp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "type": "string"
+        },
+        "sourceParams": {
+          "$ref": "#/definitions/AppAppParams",
+          "title": "These are just parameters passed to the testlet. The actual desired target and source are defined in livetest"
+        },
+        "targetParams": {
+          "$ref": "#/definitions/AppAppParams"
+        }
+      }
+    },
+    "expAppList": {
+      "type": "object",
+      "properties": {
+        "apps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/expApp"
+          }
+        }
+      }
+    },
+    "expAppResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "success": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    }
+  }
 }

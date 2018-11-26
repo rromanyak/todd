@@ -31,14 +31,14 @@ func StartAPI(cfg *config.ToDDConfig, p *persistence.Persistence) error {
 	if err != nil {
 		log.Errorf("failed to listen: %v", err)
 	}
-	// Creates a new gRPC server
+
 	s := grpc.NewServer()
 	pb.RegisterGroupsServer(s, &server{
 		cfg:         cfg,
 		persistence: p,
 	})
 
-	// log.Infof("Serving ToDD Server API at: %s\n", serveURL)
+	// log.Infof("Serving ToDD API at: %s\n", serveURL)
 
 	defer s.Stop()
 	return s.Serve(lis)

@@ -11,6 +11,7 @@ package api
 import (
 	"context"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	pb "github.com/toddproject/todd/api/exp/generated"
 
 	log "github.com/Sirupsen/logrus"
@@ -18,9 +19,12 @@ import (
 
 func (s *server) CreateGroup(ctx context.Context, newGroup *pb.Group) (*pb.GroupResponse, error) {
 
-	newGroup.Validate()
+	err := newGroup.Validate()
+	if err != nil {
+		return nil, err
+	}
 
-	err := s.persistence.CreateGroup(newGroup)
+	err = s.persistence.CreateGroup(newGroup)
 	if err != nil {
 		log.Errorln(err)
 		return nil, err
@@ -29,7 +33,7 @@ func (s *server) CreateGroup(ctx context.Context, newGroup *pb.Group) (*pb.Group
 	return &pb.GroupResponse{Id: newGroup.Id, Success: true}, nil
 }
 
-func (s *server) ListGroups(ctx context.Context, f *pb.GroupFilter) (*pb.GroupList, error) {
+func (s *server) ListGroups(ctx context.Context, _ *empty.Empty) (*pb.GroupList, error) {
 
 	groups, err := s.persistence.ListGroups()
 	if err != nil {
