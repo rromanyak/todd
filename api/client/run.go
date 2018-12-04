@@ -103,39 +103,54 @@ func (capi ClientAPI) Run(conf map[string]string, testrunName string, displayRep
 
 	fmt.Println("(Please be patient while the test finishes...)")
 
-	err = listenForTestStatus(conf)
-	if err != nil {
-		fmt.Printf("Problem subscribing to testrun updates stream: %s\n", err)
-		fmt.Println("Will now watch the testrun metrics API for 45 seconds to see if we get a result that way. Please wait...")
-	}
+	// Below timeout handling is a corner case, when the test is started and while it is being setup or in progress, the agent dies.
+	// In that case, the test will never finish and will be hanging unfinished indefinitelly.
+	timeout2 := time.After(30 * time.Second)
+	c1 := make(chan error, 1)
+	go func() {
+		c1 <- listenForTestStatus(conf)
+	}()
 
-	// Poll for results
-	timeout := time.After(45 * time.Second)
-	data, err := getRunResult(conf, testUUID)
-	for err != nil {
-		select {
-		case <-timeout:
-			return errors.New("Failed to retrieve test data after 45 seconds. Something must be wrong - quitting.")
-		default:
-			time.Sleep(1 * time.Second)
-			data, err = getRunResult(conf, testUUID)
-		}
-	}
-
-	fmt.Printf("\n\nDone.\n")
-
-	// display it to the user if desired
-	if sourceGroup != "" || displayReport {
-		var buf bytes.Buffer
-		err := json.Indent(&buf, data, "", "  ")
+	select {
+	case <-timeout2:
+		return errors.New("Failed to retrieve test data after 30 seconds. (RRM)")
+	case err = <-c1:
 		if err != nil {
-			fmt.Printf("error %q: %v\n", string(data), err)
+			fmt.Printf("Problem subscribing to testrun updates stream: %s\n", err)
+			fmt.Println("Will now watch the testrun metrics API for 45 seconds to see if we get a result that way. Please wait...")
 		}
-		buf.WriteTo(os.Stdout)
-		fmt.Println()
+
+		fmt.Println("\nPolling results...")
+		// Poll for results
+		timeout := time.After(45 * time.Second)
+		data, err := getRunResult(conf, testUUID)
+		for err != nil {
+			select {
+			case <-timeout:
+				return errors.New("failed to retrieve test data after 45 seconds. Something must be wrong - quitting")
+			default:
+				time.Sleep(1 * time.Second)
+				data, err = getRunResult(conf, testUUID)
+			}
+		}
+
+		fmt.Printf("\n\nDone.\n")
+
+		// display it to the user if desired
+		if sourceGroup != "" || displayReport {
+			var buf bytes.Buffer
+			err := json.Indent(&buf, data, "", "  ")
+			if err != nil {
+				fmt.Printf("error %q: %v\n", string(data), err)
+			}
+			buf.WriteTo(os.Stdout)
+			fmt.Println()
+		}
+
+		return nil
+
 	}
 
-	return nil
 }
 
 var errNoTestResult = errors.New("No test result")
